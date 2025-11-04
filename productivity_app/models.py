@@ -61,6 +61,16 @@ class Task(models.Model):
         ('done', 'Done'),
     ]
 
+    # Choices for the 'category' field
+    CATEGORY_CHOICES = [
+        ('development', 'Development'),
+        ('design', 'Design'),
+        ('testing', 'Testing'),
+        ('documentation', 'Documentation'),
+        ('other', 'Other'),
+    ]
+
+    # Choices for the 'property' field
     PRIORITY_CHOICES = [
         ('low', 'Low'),
         ('medium', 'Medium'),
