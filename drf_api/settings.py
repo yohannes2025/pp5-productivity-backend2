@@ -43,8 +43,8 @@ DEBUG = 'DEV' in os.environ
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'pp5-productivity-backend.onrender.com',
-    'pp5-productivity-frontend.onrender.com',
+    'pp5-productivity-backend2.onrender.com',
+    'pp5-productivity-frontend2.onrender.com',
 ]
 
 # Add Render.com URL to allowed hosts
@@ -84,7 +84,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://pp5-productivity-frontend.onrender.com",
+    "https://pp5-productivity-frontend2.onrender.com",
     "http://localhost:3000",
 ]
 
@@ -98,7 +98,7 @@ CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://pp5-productivity-frontend.onrender.com",
+    "https://pp5-productivity-frontend2.onrender.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
