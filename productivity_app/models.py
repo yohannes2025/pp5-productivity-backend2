@@ -47,15 +47,14 @@ class Category(models.Model):
 # Auto-create default categories after migrations
 @receiver(post_migrate)
 def create_default_categories(sender, **kwargs):
-    if sender.name == 'productivity_app':  # Only run for this app
-        defaults = ['Development', 'Design', 'Testing', 'Documentation', 'Other']
-        created_count = 0
-        for name in defaults:
-            obj, created = Category.objects.get_or_create(name=name)
-            if created:
-                created_count += 1
-        if created_count:
-            print(f"Created {created_count} default categories.")
+    # ONLY run for our app
+    if sender.name != 'productivity_app':
+        return
+
+    defaults = ['Development', 'Design', 'Testing', 'Documentation', 'Other']
+    for name in defaults:
+        Category.objects.get_or_create(name=name)
+    print("Default categories ready!")
 
 # ----------------------------------------------------------------------
 # Task
