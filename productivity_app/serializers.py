@@ -7,11 +7,10 @@ import cloudinary.uploader
 
 User = get_user_model()
 
+
 # ──────────────────────────────
 #  Register / Login  (unchanged)
 # ──────────────────────────────
-
-
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
 
@@ -76,7 +75,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 # ──────────────────────────────
-#  File – NOW WORKS WITH CLOUDINARY
+#  File – Cloudinary Upload
 # ──────────────────────────────
 class FileSerializer(serializers.ModelSerializer):
     file = serializers.FileField(write_only=True, required=False)
@@ -112,14 +111,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 # ──────────────────────────────
-#  Task – Full Create / Update
+#  Task – Full Create / Update (FIXED: full_clean added)
 # ──────────────────────────────
 class TaskSerializer(serializers.ModelSerializer):
     assigned_users = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), many=True, required=False
     )
     category = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all())
+        queryset=Category.objects.all()
+    )
     upload_files = FileSerializer(many=True, read_only=True)
     new_files = serializers.ListField(
         child=serializers.FileField(),
@@ -139,22 +139,40 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         new_files = validated_data.pop("new_files", [])
         users = validated_data.pop("assigned_users", [])
-        task = Task.objects.create(**validated_data)
+
+        # Create task instance
+        task = Task(**validated_data)
+
+        # CRITICAL: Run model validation (past due_date, etc.)
+        task.full_clean()
+
+        task.save()
         task.assigned_users.set(users)
+
+        # Handle file uploads
         for f in new_files:
             FileSerializer(context={"task": task}).create({"file": f})
+
         return task
 
     def update(self, instance, validated_data):
         new_files = validated_data.pop("new_files", [])
         users = validated_data.pop("assigned_users", None)
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
+        # CRITICAL: Validate before saving
+        instance.full_clean()
+
+        instance.save()
+
         if users is not None:
             instance.assigned_users.set(users)
-        instance.save()
+
         for f in new_files:
             FileSerializer(context={"task": instance}).create({"file": f})
+
         return instance
 
 
