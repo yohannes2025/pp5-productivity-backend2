@@ -1,17 +1,21 @@
-# productivity_app/models.py
-import os
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+import os
+import sys
+
+from cloudinary_storage.fields import CloudinaryResourceField
 
 User = get_user_model()
 
 # ----------------------------------------------------------------------
 # Profile
 # ----------------------------------------------------------------------
+
+
 class Profile(models.Model):
     user = models.OneToOneField(
         User,
@@ -27,6 +31,7 @@ class Profile(models.Model):
     def __str__(self):
         return f"Profile of {self.user.username}"
 
+
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if created:
@@ -35,6 +40,8 @@ def create_profile(sender, instance, created, **kwargs):
 # ----------------------------------------------------------------------
 # Category – now auto-populated on first migrate
 # ----------------------------------------------------------------------
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -45,6 +52,8 @@ class Category(models.Model):
         return self.name
 
 # Auto-create default categories after migrations
+
+
 @receiver(post_migrate)
 def create_default_categories(sender, **kwargs):
     # ONLY run for our app
@@ -59,6 +68,8 @@ def create_default_categories(sender, **kwargs):
 # ----------------------------------------------------------------------
 # Task
 # ----------------------------------------------------------------------
+
+
 class Task(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -74,7 +85,8 @@ class Task(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     due_date = models.DateField(null=True, blank=True)
-    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+    priority = models.CharField(
+        max_length=20, choices=PRIORITY_CHOICES, default='medium')
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -82,8 +94,10 @@ class Task(models.Model):
         null=True,
         blank=True
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    assigned_users = models.ManyToManyField(User, related_name='assigned_tasks', blank=True)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending')
+    assigned_users = models.ManyToManyField(
+        User, related_name='assigned_tasks', blank=True)
     created_by = models.ForeignKey(
         User,
         related_name='created_tasks',
@@ -117,9 +131,12 @@ class Task(models.Model):
 # ----------------------------------------------------------------------
 # File Upload
 # ----------------------------------------------------------------------
+
+
 class File(models.Model):
-    task = models.ForeignKey(Task, related_name='upload_files', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='task_files/')
+    task = models.ForeignKey(
+        Task, related_name='upload_files', on_delete=models.CASCADE)
+    file = CloudinaryResourceField(upload_to='task_files/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
