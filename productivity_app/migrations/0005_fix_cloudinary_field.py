@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         # <-- change only if your last migration number is different
-        ('productivity_app', '0004_file'),
+        ('productivity_app', '__first__'),
     ]
 
     operations = [
