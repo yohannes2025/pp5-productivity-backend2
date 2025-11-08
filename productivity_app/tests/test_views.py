@@ -33,7 +33,6 @@ class BaseAPITestCase(TestCase):
 
 # --- Authentication Tests ---
 class AuthenticationTests(BaseAPITestCase):
-
     def test_user_registration(self):
         url = reverse("productivity_app:register")
         data = {
@@ -57,7 +56,6 @@ class AuthenticationTests(BaseAPITestCase):
 
 # --- User API Tests ---
 class UserAPITests(BaseAPITestCase):
-
     def test_users_list_requires_auth(self):
         url = reverse("productivity_app:users-list")
         response = self.client.get(url)
@@ -69,7 +67,8 @@ class UserAPITests(BaseAPITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(
-            any(u["username"] == self.user.username for u in response.data))
+            any(u["username"] == self.user.username for u in response.data)
+        )
 
     def test_user_detail_update(self):
         self.authenticate()
@@ -83,13 +82,13 @@ class UserAPITests(BaseAPITestCase):
 
 # --- Profile API Tests ---
 class ProfileAPITests(BaseAPITestCase):
-
     def test_profile_list(self):
         url = reverse("productivity_app:profile-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(
-            any("user_name" in profile for profile in response.data))
+            any("user_name" in profile for profile in response.data)
+        )
 
     def test_profile_update_only_self(self):
         """Profile cannot update username; API should allow updating other fields only."""
@@ -107,10 +106,11 @@ class ProfileAPITests(BaseAPITestCase):
 
 # --- Task API Tests ---
 class TaskAPITests(BaseAPITestCase):
-
     def setUp(self):
         super().setUp()
-        self.category = Category.objects.create(name="Development")
+        # Use get_or_create – avoids UNIQUE constraint error
+        self.category, _ = Category.objects.get_or_create(name="Development")
+
         self.task = Task.objects.create(
             title="Test Task",
             description="Task description",
@@ -128,7 +128,8 @@ class TaskAPITests(BaseAPITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(
-            any(t["title"] == self.task.title for t in response.data))
+            any(t["title"] == self.task.title for t in response.data)
+        )
 
     def test_task_create(self):
         self.authenticate()
