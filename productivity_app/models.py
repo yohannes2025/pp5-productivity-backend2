@@ -5,9 +5,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import os
-import sys
 
-from cloudinary_storage.fields import CloudinaryResourceField
+# Correct import for Cloudinary
+from cloudinary.models import CloudinaryField
 
 User = get_user_model()
 
@@ -37,11 +37,10 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-# ----------------------------------------------------------------------
-# Category – now auto-populated on first migrate
-# ----------------------------------------------------------------------
 
-
+# ----------------------------------------------------------------------
+# Category – auto-populated on first migrate
+# ----------------------------------------------------------------------
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -51,25 +50,20 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-# Auto-create default categories after migrations
-
 
 @receiver(post_migrate)
 def create_default_categories(sender, **kwargs):
-    # ONLY run for our app
     if sender.name != 'productivity_app':
         return
-
     defaults = ['Development', 'Design', 'Testing', 'Documentation', 'Other']
     for name in defaults:
         Category.objects.get_or_create(name=name)
     print("Default categories ready!")
 
+
 # ----------------------------------------------------------------------
 # Task
 # ----------------------------------------------------------------------
-
-
 class Task(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -116,7 +110,7 @@ class Task(models.Model):
             raise ValidationError("Due date cannot be in the past.")
 
     def save(self, *args, **kwargs):
-        self.full_clean()  # Ensures validation runs
+        self.full_clean()
         super().save(*args, **kwargs)
 
     @property
@@ -128,15 +122,15 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+
 # ----------------------------------------------------------------------
 # File Upload
 # ----------------------------------------------------------------------
-
-
 class File(models.Model):
     task = models.ForeignKey(
         Task, related_name='upload_files', on_delete=models.CASCADE)
-    file = CloudinaryResourceField(upload_to='task_files/')
+    # Official Cloudinary field – stores files in your Cloudinary account
+    file = CloudinaryField('file', folder='task_files')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
