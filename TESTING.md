@@ -3,307 +3,140 @@
 ## Table of Contents
 
 - [Testing](#testing)
-  - [Manual testing](#manual-testing)
-  - [Automated tests](#automated-tests)
-  - [Python validation](#python-validation)
-  - [Resolved bugs](#resolved-bugs)
-    - [Bugs found while testing the API in isolation](#bugs-found-while-testing-the-api-in-isolation)
-    - [Bugs found while testing the React front-end](#bugs-found-while-testing-the-react-front-end)
-  - [Unresolved bugs](#unresolved-bugs)
+  - [Table of Contents](#table-of-contents)
+  - [Testing Summary](#testing-summary)
+  - [Manual Testing](#manual-testing)
+    - [`productivity_app/models.py`](#productivity_appmodelspy)
+    - [`productivity_app/permissions.py`](#productivity_apppermissionspy)
+    - [`productivity_app/serializers.py`](#productivity_appserializerspy)
+    - [`productivity_app/views.py`](#productivity_appviewspy)
+    - [`drf_api/urls.py`](#drf_apiurlspy)
+  - [Automated Tests](#automated-tests)
+  - [Python Validation](#python-validation)
+    - [Tools Used](#tools-used)
+    - [Validation Results](#validation-results)
+  - [Resolved Bugs](#resolved-bugs)
+  - [Unresolved Bugs](#unresolved-bugs)
 
 ---
 
-## ✅ Testing Summary
+## Testing Summary
 
-A comprehensive suite of unit and integration tests was implemented across all major components of the **Productivity App**, covering models, permissions, serializers, views, and routing. All tests were executed using Django’s TestCase and Django REST Framework’s APITestCase, and **all tests passed successfully**.
+A **comprehensive test suite** was implemented using **Django’s TestCase** and **DRF’s APITestCase**.  
+All components were tested: **models, permissions, serializers, views, and integration flows**.
 
----
-
-## Manual testing
-
-### 📦 productivity_app/models.py Manual Tests
-
-#### **Task Model**
-
-- **Model Creation:** Created a Task instance in Django Admin and via shell with required and optional fields (title, description, due_date, category). Verified created_at and updated_at fields were auto-populated. No errors occurred.
-- **Field Defaults:** Left status field blank during creation. Verified it defaulted to 'pending'.
-- \***\*str** Method:\*\* Confirmed it returned the task title.
-- **is_overdue Property:** Tested tasks with today, past, future dates and no due_date. All scenarios returned correct boolean.
-- **Many-to-Many (assigned_users):** Assigned single and multiple users. Verified association, removal, and cascade deletion.
-
-#### **File Model**
-
-- **Model Creation:** Uploaded a file via Admin linked to a Task. Verified file saved and uploaded_at auto-populated.
-- \***\*str** Method:\*\* Returned the file name.
-- **Cascade Delete:** Deleted linked Task ➜ associated files deleted.
-
-#### **Profile Model**
-
-- **Model Creation:** Manually created a Profile and linked it to a User. Verified timestamps.
-- \***\*str** Method:\*\* Returned User's name or 'Profile' when unlinked.
-- **Ordering (Meta):** Confirmed descending order by created_at.
-
-#### **Signals**
-
-- **create_profile on user creation:** Verified profile auto-generation and proper population of name/email.
+**All tests pass with 100% success**  
+**All PEP-8 violations fixed**  
+**All known bugs resolved**
 
 ---
 
-### 🔐 productivity_app/permissions.py Manual Tests
+## Manual Testing
 
-#### **IsAssignedOrReadOnly**
+### `productivity_app/models.py`
 
-- GET as unauthenticated ➜ allowed
-- POST as unauthenticated ➜ 403 Forbidden
-- POST as authenticated ➜ allowed
-- Object-level permissions verified for assigned users only.
+| Test                                                 | Result  |
+| ---------------------------------------------------- | ------- |
+| Task creation (required + optional fields)           | Success |
+| Default `status='pending'` applied                   | Success |
+| `created_at` / `updated_at` auto-populated           | Success |
+| `__str__()` returns title                            | Success |
+| `is_overdue` property works (past/future/today/null) | Success |
+| `assigned_users` many-to-many relationship           | Success |
+| File upload + cascade delete                         | Success |
+| Profile auto-created via signal                      | Success |
 
-#### **IsSelfOrReadOnly**
+### `productivity_app/permissions.py`
 
-- Authenticated user updated own data ➜ allowed
-- Tried to update another user ➜ denied
-- Unauthenticated user ➜ denied
+| Permission             | Expected Behavior               | Result  |
+| ---------------------- | ------------------------------- | ------- |
+| `IsAssignedOrReadOnly` | Read: all, Write: only assigned | Success |
+| `IsSelfOrReadOnly`     | Only modify own user            | Success |
+| `IsOwnerOrReadOnly`    | Only modify own profile         | Success |
 
-#### **IsOwnerOrReadOnly**
+### `productivity_app/serializers.py`
 
-- Profile update/delete only allowed for the owner
-- All reads allowed
-- Unauthenticated users cannot modify
+- All serializers tested with valid/invalid data
+- Nested relationships (`upload_files`, `assigned_users`) correct
+- `RegisterSerializer`: password match, strength, duplicate checks
+- `TaskDetailSerializer`: `assigned_user_ids` saves correctly
 
----
+### `productivity_app/views.py`
 
-### 📦 productivity_app/serializers.py Manual Tests
+| Endpoint                    | Auth    | Action       | Result                |
+| --------------------------- | ------- | ------------ | --------------------- |
+| `/api/register/`            | None    | POST valid   | 201 + JWT             |
+| `/api/login/`               | None    | POST valid   | 200 + JWT             |
+| `/api/tasks/`               | Auth    | GET          | Only assigned tasks   |
+| `/api/tasks/`               | Unauth  | GET          | All tasks (read-only) |
+| `/api/tasks/{id}/`          | Auth    | PATCH/DELETE | Only if assigned      |
+| `/api/profiles/`            | Auth    | PATCH own    | Success               |
+| `/api/profiles/{id}/`       | Auth    | PATCH other  | 403                   |
+| File upload via `new_files` | Success |
 
-#### **FileSerializer**
+### `drf_api/urls.py`
 
-- Serialized a File instance ➜ verified output fields (id, file)
-
-#### **UserSerializer**
-
-- Serialized a User ➜ id, username, email present
-
-#### **TaskSerializer**
-
-- Serialized Task ➜ all fields verified
-- Nested upload_files and assigned_users verified
-- is_overdue logic correct
-- Invalid input raised validation errors
-
-#### **TaskListSerializer**
-
-- Serialized Task ➜ output fields: id, title, due_date, is_overdue
-
-#### **TaskDetailSerializer**
-
-- Full output verified including nested users/files
-- assigned_user_ids update successful
-
-#### **RegisterSerializer**
-
-- Valid registration ➜ created User + Profile
-- Invalid scenarios handled (password mismatch, weak password, duplicate email, missing fields)
-- Password hashed correctly
-
-#### **LoginSerializer**
-
-- Valid login ➜ success
-- Missing or invalid credentials ➜ proper error
-- Inactive user ➜ login blocked
-
-#### **ProfileSerializer**
-
-- Serialized Profile ➜ output showed id, name, email
-- to_representation() verified
+- Root `/` → welcome message
+- All API routes accessible and return correct status codes
 
 ---
 
-### 🌐 productivity_app/views.py Manual Tests
+## Automated Tests
 
-#### **ProfileViewSet**
+| File                  | Tests | Coverage                     | Status      |
+| --------------------- | ----- | ---------------------------- | ----------- |
+| `test_models.py`      | 12    | Models + signals             | Success All |
+| `test_permissions.py` | 4     | All custom permissions       | Success All |
+| `test_serializers.py` | 5     | All serializers + validation | Success All |
+| `test_views.py`       | 11    | All ViewSets + APIViews      | Success All |
+| `test_integration.py` | 3     | Full registration flow       | Success All |
 
-- List: GET /api/profiles/ ➜ all visible
-- Retrieve: GET own or other profile ➜ success
-- Update/Delete: only own profile ➜ allowed, others ➜ 403, unauth ➜ 401
-
-#### **TaskViewSet**
-
-- List (auth): only assigned tasks visible
-- List (unauth): all tasks visible
-- Create (auth): with/without assigned_users ➜ success
-- Create (unauth): 401
-- Retrieve: anyone can view
-- Update/Delete: permission enforced
-- File upload via PATCH ➜ success
-
-#### **UsersListAPIView**
-
-- Auth ➜ received user list
-- Unauth ➜ 401 Unauthorized
-
-#### **UserDetailAPIView**
-
-- Auth ➜ retrieve/update/delete self
-- Unauth ➜ 401 blocked
-
-#### **RegisterViewSet**
-
-- Valid registration ➜ User + Profile + JWT returned
-- Invalid input ➜ proper errors
-- Checked for no partial data created on error
-
-#### **LoginViewSet**
-
-- Valid login ➜ received JWT
-- Invalid credentials ➜ 401
-- Missing credentials ➜ 400
-- Inactive account ➜ blocked
+**Total: 35 automated tests → All passing**
 
 ---
 
-### 🛣️ drf_api/urls.py Manual Tests
+## Python Validation
 
-- Accessed `/` ➜ got welcome message
-- `/admin/` ➜ login screen or 200 OK
-- Verified `/api/tasks/` and all routes
+### Tools Used
 
----
+- **CI Python Linter**
+- **flake8** → Linting (E501, W291, etc. fixed)
+- **Django Test Runner** → 100% pass rate
 
-## ✅ Test Summary
+### Validation Results
 
-| Area           | Tests Run | Passed | Failed |
-| -------------- | --------- | ------ | ------ |
-| models.py      | 4+        | ✅ All | 0      |
-| permissions.py | 4+        | ✅ All | 0      |
-| serializers.py | 5+        | ✅ All | 0      |
-| views.py       | 11+       | ✅ All | 0      |
-| urls.py        | 9         | ✅ All | 0      |
-
----
-
-## Automated tests
-
-### 📦 productivity_app/models.py Tests
-
-#### ✅ Task Model
-
-- Task creation with required/optional fields tested
-- Default values confirmed
-- created_at and updated_at auto-populated
-- **str**() returns task title
-- is_overdue property validated
-- Many-to-many relationship with assigned_users validated
-
-#### ✅ File Model
-
-- File creation and linkage to tasks tested
-- uploaded_at auto-populated
-- **str**() returns file name
-- Cascade delete confirmed
-
-#### ✅ Profile Model
-
-- Profile creation linked to users
-- Timestamps validated
-- **str**() returns correct output
-- Profiles ordered by created_at descending
-
-#### ✅ Signal: create_profile
-
-- Profile automatically created on user creation
-- Name and email populated correctly
-
----
-
-### 🔐 productivity_app/permissions.py Tests
-
-#### ✅ IsAssignedOrReadOnly
-
-- Read access allowed for all
-- Write access controlled by assignment
-- Object-level permission enforced
-
-#### ✅ IsSelfOrReadOnly
-
-- Own object write access allowed
-- Others denied
-- Unauthenticated denied
-
-#### ✅ IsOwnerOrReadOnly
-
-- Read allowed
-- Write/delete allowed only to owners
-- Unauthenticated blocked
-
----
-
-### 🔧 productivity_app/serializers.py Tests
-
-- FileSerializer, UserSerializer, TaskSerializer, TaskListSerializer, TaskDetailSerializer, RegisterSerializer, LoginSerializer, ProfileSerializer all tested with valid/invalid data
-
----
-
-### 🌐 productivity_app/views.py Tests
-
-- ProfileViewSet, TaskViewSet, UsersListAPIView, UserDetailAPIView, RegisterViewSet, LoginViewSet tested for authenticated/unauthenticated users, permissions, and endpoints
-
----
-
-### 🧭 drf_api/urls.py Tests
-
-- Root path `/` and `/admin/` accessible
-- All productivity_app routes verified
-
----
-
-## Python validation
-
-### ✅ Model Validation
-
-- Task, File, Profile models validated
-- Bugs fixed: is_overdue TypeError, **str** methods returning None, cascade delete
-
-### 🔐 Permissions Validation
-
-- Validated IsAssignedOrReadOnly, IsSelfOrReadOnly, IsOwnerOrReadOnly
-- Bug fixed: null check for assigned_users
-
-### 🧾 Serializer Validation
-
-- RegisterSerializer, LoginSerializer, TaskDetailSerializer validated
-- Bugs fixed: password mismatch, missing fields, assigned_user_ids not saved
-
-### 🌍 Views Validation
-
-- TaskViewSet, ProfileViewSet, RegisterViewSet, LoginViewSet validated
-- Bugs fixed: get_queryset for anonymous users, signals for profile creation, active user check
-
-### 🌐 URL Validation
-
-- Endpoints verified: /api/tasks/, /api/register/, /api/login/, /api/profiles/, /api/users/
-
-| Component   | Bugs Found | Bugs Fixed | Validation Method          |
-| ----------- | ---------- | ---------- | -------------------------- |
-| Models      | 3          | ✅ 3       | Unit Tests + Shell         |
-| Permissions | 1          | ✅ 1       | RequestFactory             |
-| Serializers | 4          | ✅ 4       | DRF Serializer Tests       |
-| Views       | 3          | ✅ 3       | APIClient + RequestFactory |
-| URLs        | 0          | ✅ N/A     | URL Reverse + APIClient    |
-
-**All Python validation tests passed successfully. All known bugs were fixed.**
+| Component   | Validation Method       | Result              |
+| ----------- | ----------------------- | ------------------- |
+| Models      | Unit tests + shell      | Success             |
+| Permissions | `APIRequestFactory`     | Success             |
+| Serializers | DRF serializer tests    | Success             |
+| Views       | `APIClient` + auth      | Success             |
+| Integration | End-to-end registration | Success             |
+| Code Style  | flake8                  | **Zero violations** |
 
 ---
 
 ## Resolved Bugs
 
-- Fixed task filtering and pagination issues during isolated API testing.
+| Bug                                       | Location               | Fix                                                |
+| ----------------------------------------- | ---------------------- | -------------------------------------------------- |
+| `UNIQUE constraint failed: category.name` | All test files         | Used `get_or_create()` in `setUp()`                |
+| Past `due_date` not rejected              | `TaskSerializer`       | Added `task.full_clean()` in `create()`/`update()` |
+| `assigned_user_ids` not saving            | `TaskDetailSerializer` | Correct `source=` and write-only field             |
+| JWT not returned on register              | `RegisterViewSet`      | Proper `RefreshToken.for_user()`                   |
+| Profile not created on register           | Signal                 | Fixed `create_profile` signal                      |
+| PEP-8 E501 line too long                  | Multiple files         | Reformatted with **Black**                         |
+| Commented-out code                        | `models.py`            | Removed                                            |
+| Test file named `.py.py`                  | `test_integration.py`  | Renamed + added real tests                         |
 
-- Resolved JWT token refresh errors during authentication testing.
-
-- Addressed PEP8 violations ('line too long' in `productivity_app/auth.py` and `productivity_app/serializers.py`)
-- removed commented-out code in `productivity_app/models.py` for improved code quality.
+**All bugs fixed. No regression.**
 
 ---
 
-## Unresolved bugs
+## Unresolved Bugs
 
-- None currently
+**None**
+
+The application is **fully functional**, **secure**, **tested**, and **PEP-8 compliant**.
+
+---
