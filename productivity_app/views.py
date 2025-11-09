@@ -11,7 +11,6 @@ from rest_framework.permissions import (
 
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import permissions
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 # Django imports
