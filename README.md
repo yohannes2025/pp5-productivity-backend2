@@ -5,7 +5,7 @@
 The **Productivity App** project focuses on developing a **calendar-driven application** designed to help users organize their time efficiently. This **browser-based platform** allows users to create and manage **tasks and habits** effectively.
 This application is built to ensure a **seamless user experience** in maintaining daily productivity through a clean, intuitive interface and smart task organization tools.
 
-[View the website here](https://pp5-productivity-frontend.onrender.com/)
+[View the website here](https://pp5-productivity-frontend2.onrender.com/)
 
 ## Table of contents
 
@@ -47,7 +47,7 @@ The Productivity App Backend is built using Django REST Framework to provide a s
 
 ## Project Goals
 
-This project provides a Django Rest Framework API for the [Productivity App Project](https://github.com/yohannes2025/pp5_productivity_app_frontend).
+This project provides a Django Rest Framework API for the [Productivity App Project](https://github.com/yohannes2025/pp5_productivity_app_frontend2).
 
 - Provide a **robust API** for task creation, retrieval, updating, and deletion, with support for filtering and pagination.
 - Ensure **secure authentication** using JSON Web Tokens (JWT) and social media login via `dj-allauth`.
@@ -58,7 +58,7 @@ This project provides a Django Rest Framework API for the [Productivity App Proj
 
 ## Planning
 
-Planning started by creating epics and user stories for the frontend application, based on the project goals. The user stories were used to inform wireframes mapping out the intended functionality and 'flow' through the app. See the [repo for the frontend React app](https://github.com/yohannes2025/pp5-productivity-frontend) for more details.
+Planning started by creating epics and user stories for the frontend application, based on the project goals. The user stories were used to inform wireframes mapping out the intended functionality and 'flow' through the app. See the [repo for the frontend React app](https://github.com/yohannes2025/pp5-productivity-frontend2) for more details.
 
 The user stories requiring implementation to achieve a minimum viable product (MVP) were then mapped to API endpoints required to support the desired functionality.
 
