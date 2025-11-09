@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 import os
 
-# Correct import for Cloudinary
+# import for Cloudinary
 from cloudinary.models import CloudinaryField
 
 User = get_user_model()

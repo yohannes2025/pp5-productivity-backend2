@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 # ──────────────────────────────
-#  Register / Login  (unchanged)
+#  Register / Login
 # ──────────────────────────────
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -143,7 +143,7 @@ class TaskSerializer(serializers.ModelSerializer):
         # Create task instance
         task = Task(**validated_data)
 
-        # CRITICAL: Run model validation (past due_date, etc.)
+        # Run model validation (past due_date, etc.)
         task.full_clean()
 
         task.save()
@@ -162,7 +162,7 @@ class TaskSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        # CRITICAL: Validate before saving
+        # Validate before saving
         instance.full_clean()
 
         instance.save()

@@ -23,7 +23,8 @@ class IsAssignedOrReadOnly(BasePermission):
 
 class IsSelfOrReadOnly(BasePermission):
     """
-    Allows users to retrieve, update, or delete their own user account only.
+    Allows users to retrieve, update, 
+    or delete their own user account only.
     """
 
     def has_object_permission(self, request, view, obj):
