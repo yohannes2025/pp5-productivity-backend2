@@ -47,7 +47,7 @@ The Productivity App Backend is built using Django REST Framework to provide a s
 
 ## Project Goals
 
-This project provides a Django Rest Framework API for the [Productivity App Project](https://github.com/yohannes2025/pp5_productivity_app_frontend2).
+This project provides a Django Rest Framework API for the [Productivity App Project](https://pp5-productivity-frontend2.onrender.com/).
 
 - Provide a **robust API** for task creation, retrieval, updating, and deletion, with support for filtering and pagination.
 - Ensure **secure authentication** using JSON Web Tokens (JWT) and social media login via `dj-allauth`.
