@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
-from productivity_app.models import Task, Category
+from productivity_app.models import Category
 from productivity_app.serializers import TaskSerializer, RegisterSerializer
 
 User = get_user_model()
@@ -31,7 +31,9 @@ class TaskSerializerTests[TestCase]:
         data = {
             'title': 'Task',
             'description': 'Details',
-            'due_date': (timezone.now().date() + timedelta(days=1)).isoformat(),
+            'due_date': (
+                timezone.now().date() + timedelta(days=1)
+            ).isoformat(),
             'priority': 'high',
             'category': self.category.id,
             'status': 'pending',
@@ -53,7 +55,9 @@ class TaskSerializerTests[TestCase]:
         data = {
             'title': 'Past Task',
             'description': 'Invalid',
-            'due_date': (timezone.now().date() - timedelta(days=1)).isoformat(),
+            'due_date': (
+                timezone.now().date() - timedelta(days=1))
+            .isoformat(),
             'priority': 'low',
             'category': self.category.id,
             'status': 'pending',
@@ -108,7 +112,9 @@ class RegisterSerializerTests(TestCase):
     # ------------------------------------------------------------
     def test_register_serializer_existing_user(self):
         User.objects.create_user(
-            username='existinguser', email='test@example.com', password='password123!'
+            username='existinguser',
+            email='test@example.com',
+            password='password123!'
         )
 
         # duplicate username

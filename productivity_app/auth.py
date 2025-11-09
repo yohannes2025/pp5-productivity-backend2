@@ -23,10 +23,16 @@ class LoginView(APIView):
             login(request, user)
             serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            {'error': 'Invalid Credentials'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
 
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
-        return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'Logged out successfully'},
+            status=status.HTTP_200_OK
+        )

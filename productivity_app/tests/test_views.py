@@ -6,7 +6,7 @@ from rest_framework import status
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import get_user_model
-from productivity_app.models import Task, Profile, Category
+from productivity_app.models import Task, Category
 
 User = get_user_model()
 
@@ -91,7 +91,11 @@ class ProfileAPITests(BaseAPITestCase):
         )
 
     def test_profile_update_only_self(self):
-        """Profile cannot update username; API should allow updating other fields only."""
+        """
+        Profile cannot update username;
+        API should allow updating other fields only.
+        """
+
         self.authenticate()
         profile = self.user.profile
         url = reverse("productivity_app:profile-detail", args=[profile.id])

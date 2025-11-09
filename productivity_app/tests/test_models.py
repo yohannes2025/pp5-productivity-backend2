@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 from django.contrib.auth import get_user_model
-from productivity_app.models import Task, Profile, Category
+from productivity_app.models import Task, Category
 
 User = get_user_model()
 
@@ -48,7 +48,8 @@ class TaskModelTests(TestCase):
         with self.assertRaises(ValidationError) as context:
             task.full_clean()
 
-        # Error is under '__all__' because clean() raises ValidationError("msg")
+        # Error is under '__all__'
+        # because clean() raises ValidationError("msg")
         self.assertIn('__all__', context.exception.message_dict)
         errors = context.exception.message_dict['__all__']
         self.assertIn("Due date cannot be in the past.", errors)

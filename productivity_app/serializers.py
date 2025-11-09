@@ -191,7 +191,10 @@ class TaskListSerializer(serializers.ModelSerializer):
 class TaskDetailSerializer(serializers.ModelSerializer):
     assigned_users = UserSerializer(many=True)
     assigned_user_ids = serializers.PrimaryKeyRelatedField(
-        source="assigned_users", queryset=User.objects.all(), many=True, write_only=True
+        source="assigned_users",
+        queryset=User.objects.all(),
+        many=True,
+        write_only=True
     )
     category = serializers.StringRelatedField()
     upload_files = FileSerializer(many=True)

@@ -1,7 +1,8 @@
 # productivity_app/views.py
-from rest_framework import generics, viewsets, views, status
+
+# rest_framework imports
+from rest_framework import generics, viewsets, views, status, permissions
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -15,11 +16,10 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 # Django imports
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
 from django.db import transaction
 
 # Local application imports
-from .models import Profile, Task, Category, File  # Added File to imports
+from .models import Profile, Task, Category, File
 from .permissions import IsAssignedOrReadOnly, IsSelfOrReadOnly
 from .serializers import (
     TaskSerializer,
@@ -222,4 +222,3 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
     authentication_classes = []
-
